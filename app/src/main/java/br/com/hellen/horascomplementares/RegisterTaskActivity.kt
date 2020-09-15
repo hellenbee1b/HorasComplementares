@@ -6,12 +6,17 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import br.com.hellen.data.localDataSource.AtividadeLocalDataSource
+import br.com.hellen.data.repositories.AtividadeRepositoryImp
+import br.com.hellen.domain.usercases.ManterAtividade
 import kotlinx.android.synthetic.main.activity_register_task.*
-import kotlinx.android.synthetic.main.activity_register_user.*
 import kotlinx.android.synthetic.main.activity_register_user.btnCadastrar
 import kotlinx.android.synthetic.main.activity_register_user.editCurso
+import java.sql.Date
 
 class RegisterTaskActivity : AppCompatActivity() {
+
+    private lateinit var manterAtividade: ManterAtividade
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +39,8 @@ class RegisterTaskActivity : AppCompatActivity() {
             listaCategoria
         )
 
+        manterAtividade = ManterAtividade(AtividadeRepositoryImp(AtividadeLocalDataSource(getSharedPreferences("atividades", Context.MODE_PRIVATE))))
+
         //Adicionando o adapter ao spinner
         //spnSexo.adapter = sexoAdapter
 
@@ -49,59 +56,17 @@ class RegisterTaskActivity : AppCompatActivity() {
             val descricao = editDescricao.text.toString().trim()
 
             //Verificando se os campos estão preenchidos
-            if (curso.isEmpty() ||
-                horasTotais.isEmpty() ||
-                dataInicio.isEmpty() ||
-                dataTermino.isEmpty() ||
-                professor.isEmpty() ||
-                objetivo.isEmpty() ||
-                descricao.isEmpty() ||
-                categoria == "Selecione o sexo"){
-
-                //Apresentando o erro ao usuário
-                Toast.makeText(
-                    this@RegisterTaskActivity,
-                    "Todos os campos são obrigatórios",
-                    Toast.LENGTH_LONG
-                ).show()
-            }else {
-                //Apresentar mensagem de cadastro realizado
-                Toast.makeText(
-                    this@RegisterTaskActivity,
-                    "Atividade cadastrada com sucesso",
-                    Toast.LENGTH_LONG
-                ).show()
-
-                //Criando o shared preferencias
-                val dados = getSharedPreferences(
-                    "cadastro-$curso",
-                    Context.MODE_PRIVATE
-                )
-                //Criando o editor de Shared Preferences
-                //.apply{} - > Função Lâmbda : adicionar as informações no objeto
-                //.apply() - > Salvar as informações no shared preferences
-
-                dados.edit().apply{
-                    putString("curso", curso)
-                  //  putInt("horasTotais", horasTotais)
-                    putString("dataInicio", dataInicio)
-                    putString("dataTermino", dataTermino)
-                    putString("professor", professor)
-                    putString("categoria", categoria)
-                    putString("objetivo", objetivo)
-                    putString("descricao", descricao)
-
-                }.apply()
-
-                //Abrir a tela main e passando parâmetros
+            if(manterAtividade.addAtividade(curso, Integer.parseInt(horasTotais.toString()), Date.valueOf(dataInicio), Date.valueOf(dataTermino), professor, categoria, objetivo, descricao)){
+                Toast.makeText(this@RegisterTaskActivity, "Atividade cadastrada com sucesso", Toast.LENGTH_LONG).show()
                 startActivity(
                     Intent(this@RegisterTaskActivity, MainActivity::class.java).apply {
                         putExtra("Atividade", curso)
                     }
                 )
-                //Tirar todas as telas do empilhamento
                 finishAffinity()
-
+            }else {
+                //Apresentando o erro ao usuário
+                Toast.makeText(this@RegisterTaskActivity, "Todos os campos são obrigatórios", Toast.LENGTH_LONG).show()
             }
         }
     }
