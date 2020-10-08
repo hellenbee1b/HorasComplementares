@@ -6,4 +6,6 @@ open class User (
     var curso:String = "",
     var email:String ="",
     var senha:String = ""
-)
+) {
+    override fun toString(): String = "User(nome: $nome, sobrenome: $sobrenome, curso: $curso, email: $email, senha: $senha)"
+}

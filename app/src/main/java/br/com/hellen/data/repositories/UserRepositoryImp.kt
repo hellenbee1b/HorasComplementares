@@ -1,5 +1,6 @@
 package br.com.hellen.data.repositories
 
+import br.com.hellen.core.Either
 import br.com.hellen.core.Response
 import br.com.hellen.core.ResponseFail
 import br.com.hellen.core.ResponseSuccess
@@ -18,8 +19,11 @@ class UserRepositoryImp(private val localDataSource: UserLocalDataSource): UserR
         localDataSource.putUser(user)
     }
 
-    override fun deleteUser(user: UserModel) {
+    override fun deleteUser(user: UserModel): Either<ResponseFail, ResponseSuccess> =
         localDataSource.deleteUser(user)
+
+    override fun addUser(user: UserModel) {
+        localDataSource.addUser(user)
     }
 
 }

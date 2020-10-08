@@ -27,24 +27,19 @@ class RegisterUserActivity : AppCompatActivity() {
             val email = editEmail.text.toString().trim().toLowerCase(Locale.ROOT)
             val curso = editCurso.text.toString().trim()
             val senha = editSenha.text.toString().trim()
-            val confSenha = editConfSenha.text.toString().trim()
 
             //Verificando se os campos estão preenchidos
-            if(senha == confSenha){
-                if(manterUsuario.addUser(nome, sobrenome, email, curso, senha)) {
-                    Toast.makeText(this@RegisterUserActivity, "Usuário cadastrado com sucesso", Toast.LENGTH_LONG).show()
-                    //Abrir a tela main e passando parâmetros
-                    startActivity(
-                        Intent(this@RegisterUserActivity, MainActivity::class.java).apply {
-                            putExtra("Usuario", email)
-                        }
-                    )
-                    //Tirar todas as telas do empilhamento
-                    finishAffinity()
-                }
-            } else {
-                Toast.makeText(this@RegisterUserActivity, "Senhas não coincidem", Toast.LENGTH_LONG).show()
-            }
+            manterUsuario.addUser(nome, sobrenome, email, curso, senha).fold( {
+                Toast.makeText(this@RegisterUserActivity, it.message, Toast.LENGTH_LONG).show()
+                //Abrir a tela main e passando parâmetros
+                startActivity(
+                    Intent(this@RegisterUserActivity, MainActivity::class.java).apply {
+                        putExtra("Usuario", email)
+                    }
+                )
+                //Tirar todas as telas do empilhamento
+                finishAffinity()
+            },{Toast.makeText(this@RegisterUserActivity, it.message, Toast.LENGTH_LONG).show()})
         }
     }
 }

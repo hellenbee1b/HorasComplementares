@@ -33,10 +33,11 @@ class LoginTest {
         val username = "111111"
         val password = "111111"
         // act
-        Mockito.`when`(this.repository.getUser(ArgumentMatchers.anyString())).thenAnswer{return@thenAnswer ResponseFail(message = "Usuário não encontrado") }
-        val result = login.userApproval(username, password)
+        Mockito.`when`(this.repository.getUser(ArgumentMatchers.anyString()))
+            .thenAnswer{return@thenAnswer ResponseFail(message = "Usuário não encontrado") }
+        val result = login.userApproval(username, password).getValue<ResponseFail>()
         // assert
-        Assert.assertFalse(result)
+        Assert.assertEquals(result, ResponseFail(message = "Usuário não encontrado"))
     }
 
     @Test
@@ -45,9 +46,34 @@ class LoginTest {
         val username = "Hellen"
         val password = "1234"
         // act
-        Mockito.`when`(this.repository.getUser(ArgumentMatchers.anyString())).thenAnswer{return@thenAnswer ResponseSuccess(User(email = "Hellen",senha = "1234"), "Usuário localizado") }
-        val result = login.userApproval(username, password)
+        Mockito.`when`(this.repository.getUser(ArgumentMatchers.anyString()))
+            .thenAnswer{return@thenAnswer ResponseSuccess(User(email = "Hellen",senha = "1234"), "Usuário localizado") }
+        val result = login.userApproval(username, password).getValue<ResponseSuccess>()
         // assert
-        Assert.assertTrue(result)
+        Assert.assertEquals(result.toString(), ResponseSuccess(User(email = username, senha = password),"Usuário localizado").toString())
+    }
+
+    @Test
+    fun userApprovalInvalid() {
+        // arrange
+        val username = "Hellen"
+        val password = "1111"
+        // act
+        Mockito.`when`(this.repository.getUser(ArgumentMatchers.anyString()))
+            .thenAnswer{return@thenAnswer ResponseSuccess(User(email = "Hellen",senha = "1234"), "Usuário localizado") }
+        val result = login.userApproval(username, password).getValue<ResponseFail>()
+        // assert
+        Assert.assertEquals(result.toString(), ResponseFail(message = "Acesso negado").toString())
+    }
+
+    @Test
+    fun userApprovalEmpty() {
+        // arrange
+        val username = ""
+        val password = ""
+        // act
+        val result = login.userApproval(username, password).getValue<ResponseFail>()
+        // assert
+        Assert.assertEquals(result, ResponseFail(message = "Campos obrigatórios"))
     }
 }

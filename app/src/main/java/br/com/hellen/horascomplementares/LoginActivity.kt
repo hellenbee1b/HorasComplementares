@@ -22,11 +22,11 @@ class LoginActivity : AppCompatActivity() {
         btnEntrar.setOnClickListener{
             val usuario = editUsuario.text.toString().trim()
             val senha = editSenha.text.toString().trim()
-
-            when (login.userApproval(usuario, senha)){
-                true -> startActivity(Intent(this@LoginActivity, MainActivity::class.java))
-                false -> Toast.makeText(this@LoginActivity, "Dados incorretos", Toast.LENGTH_LONG).show()
-            }
+            val result = login.userApproval(usuario, senha)
+            result.fold<Any>(
+                {Toast.makeText(this@LoginActivity, it.toString(), Toast.LENGTH_LONG).show()},
+                {startActivity(Intent(this@LoginActivity, MainActivity::class.java))}
+            )
         }
         //Clique no botão "Cadastrar"
         btnCadastrar.setOnClickListener{
